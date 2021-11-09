@@ -14,9 +14,10 @@ from nltk.corpus import stopwords
 import re, string
 from nltk import FreqDist, PorterStemmer,SnowballStemmer
 #from wordcloud import WordCloud,STOPWORDS
+nltk.download('stopwords')
 from nltk.corpus import stopwords
 nltk.download('wordnet')
-from scipy import interp
+
 # import these modules
 from nltk.stem import WordNetLemmatizer
 # from nltk.stem.snowball import SnowballStemmer
@@ -87,10 +88,10 @@ data["OriginalTweet"] = tokenized_tweets
 
 vectorizer = CountVectorizer(stop_words= 'english')
 countVec = vectorizer.fit_transform(data["OriginalTweet"])
-# joblib.dump(vectorizer,'Countvectorizer.sav')
+joblib.dump(vectorizer,'Countvectorizer.sav')
 tfidf_vectorizer = TfidfVectorizer(stop_words= 'english')
 tfidf = tfidf_vectorizer.fit_transform(data["OriginalTweet"])
-# joblib.dump(tfidf_vectorizer,'tfidf_vectorizer.sav')
+joblib.dump(tfidf_vectorizer,'tfidf_vectorizer.sav')
 
 Y = data["Sentiment"]
 
@@ -140,14 +141,17 @@ print(pd.DataFrame(data = m_confusion_test, columns = ['Predicted 0', 'Predicted
                    index = ['Actual 0', 'Actual 1','Actual 2']))
 #
 print(metrics.classification_report(y_pred,y_test))
+filenameNB1 = 'final_NB_CountVec.sav'
+joblib.dump(bayes, filenameNB1)
+#===========================================================================================
 
 list_alpha = np.arange(1/100000, 20, 0.11) #smoothing. (Laplace/Lidstone) smoothing parameter (0 for no smoothing)
+
 score_train = np.zeros(len(list_alpha))
 score_test = np.zeros(len(list_alpha))
 recall_test = np.zeros(len(list_alpha))
 precision_test= np.zeros(len(list_alpha))
 count = 0
-
 for alpha in list_alpha:
     bayes2 = naive_bayes.MultinomialNB(alpha=alpha)
     bayes2.fit(X_train2, y_train2)
@@ -165,69 +169,70 @@ print(models.head(20))
 
 best_index = models['Test Precision'].idxmax()
 models.iloc[best_index, :]
-
 best_index = models[models['Test Precision']>0.65]['Test Accuracy'].idxmax()
 print(list_alpha[best_index])
 bayes2 = naive_bayes.MultinomialNB(alpha=list_alpha[best_index])
 bayes2.fit(X_train2, y_train2)
 models.iloc[best_index, :]
-y_pred = bayes2.predict(X_test2)
+
 m_confusion_test = metrics.confusion_matrix(y_test2, bayes2.predict(X_test2))
 print("Naive Bayes with tf-idf")
-print(pd.DataFrame(data = m_confusion_test, columns = ['Predicted 0', 'Predicted 1','Predicted 2'],
+print(pd.DataFrame(data = m_confusion_test, columns = ['Predicted 0', 'Predicted 1', 'Predicted 2'],
                    index = ['Actual 0', 'Actual 1','Actual 2']))
 
-print(metrics.classification_report(y_pred,y_test2))
+filenameNB2 = 'final_NB_tf-idf.sav'
+joblib.dump(bayes2, filenameNB2)
+
 # #===============================NB END ========================================
 
 # #SVM with countVec C=1000
-svc2 = svm.SVC(C=1000, kernel='linear',probability=True)
-svc2.fit(X_train,y_train)
-y_pred = svc2.predict(X_test)
-m_confusion_test = metrics.confusion_matrix(y_test, svc2.predict(X_test))
-print("SVM with CV linear")
+svc1 = svm.SVC(C=1000, kernel='linear',probability=True)
+svc1.fit(X_train,y_train)
+y_pred = svc1.predict(X_test)
+m_confusion_test = metrics.confusion_matrix(y_test, svc1.predict(X_test))
+print("SVM with CountVec linear")
 print(pd.DataFrame(data = m_confusion_test , columns=['Predicted 0', 'Predicted 1','Predicted 2'],index=['Actual 0','Actual 1','Actual 2']))
 print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
 print(metrics.classification_report(y_pred,y_test))
 
-
-svc4 = svm.SVC(C=1000, kernel='rbf',probability=True)
-svc4.fit(X_train,y_train)
-y_pred = svc4.predict(X_test)
-m_confusion_test = metrics.confusion_matrix(y_test, svc4.predict(X_test))
+#========================================================
+svc2 = svm.SVC(C=1000, kernel='rbf',probability=True)
+svc2.fit(X_train,y_train)
+y_pred = svc2.predict(X_test)
+m_confusion_test = metrics.confusion_matrix(y_test, svc2.predict(X_test))
 print("SVM with cv rbf")
 print(pd.DataFrame(data = m_confusion_test , columns=['Predicted 0', 'Predicted 1','Predicted 2'],index=['Actual 0','Actual 1','Actual 2']))
 print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
 print(metrics.classification_report(y_pred,y_test))
-
-svc5 = svm.SVC(C=1000, kernel='rbf',probability=True)
-svc5.fit(X_train2,y_train2)
-y_pred = svc5.predict(X_test2)
-m_confusion_test = metrics.confusion_matrix(y_test2, svc5.predict(X_test2))
+#============================================================
+svc3 = svm.SVC(C=1000, kernel='linear',probability=True)
+svc3.fit(X_train2,y_train2)
+y_pred = svc3.predict(X_test2)
+m_confusion_test = metrics.confusion_matrix(y_test2, svc3.predict(X_test2))
+print("SVM with tfidf linear")
+print(pd.DataFrame(data = m_confusion_test , columns=['Predicted 0', 'Predicted 1','Predicted 2'],index=['Actual 0','Actual 1','Actual 2']))
+print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
+print(metrics.classification_report(y_pred,y_test2))
+#================================================================
+svc4 = svm.SVC(C=1000, kernel='rbf',probability=True)
+svc4.fit(X_train2,y_train2)
+y_pred = svc4.predict(X_test2)
+m_confusion_test = metrics.confusion_matrix(y_test2, svc4.predict(X_test2))
 print("SVM with tfidf rbf")
 print(pd.DataFrame(data = m_confusion_test , columns=['Predicted 0', 'Predicted 1','Predicted 2'],index=['Actual 0','Actual 1','Actual 2']))
 print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
 print(metrics.classification_report(y_pred,y_test2))
 
-svc6 = svm.SVC(C=1000, kernel='linear',probability=True)
-svc6.fit(X_train2,y_train2)
-y_pred = svc6.predict(X_test2)
-m_confusion_test = metrics.confusion_matrix(y_test2, svc6.predict(X_test2))
-print("SVM with tfidf linear")
-print(pd.DataFrame(data = m_confusion_test , columns=['Predicted 0', 'Predicted 1','Predicted 2'],index=['Actual 0','Actual 1','Actual 2']))
-print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
-print(metrics.classification_report(y_pred,y_test2))
+filenameSVC1 = 'final_SVC_linear_CV.sav'
+filenameSVC2 = 'final_SVC_rbf_CV.sav'
+filenameSVC3 = 'final_SVC_linear_tfidf.sav'
+filenameSVC4 = 'final_SVC_rbf_tfidf.sav'
 
-# filenameSVC = 'final_SVC_linear_CV.sav'
-# # filenameSVC2 = 'final_SVC2_linear_withhugeC.sav'
-# filenameSVC3 = 'final_SVC_rbf_CV.sav'
-# filenameSVC4 = 'final_SVC_rbf_tfidf.sav'
-# filenameSVC5 = 'final_SVC_linear_tfidf.sav'
-# # joblib.dump(svc3, filenameSVC2)
-# joblib.dump(svc2, filenameSVC)
-# joblib.dump(svc4, filenameSVC3)
-# joblib.dump(svc5, filenameSVC4)
-# joblib.dump(svc6, filenameSVC5)
+# joblib.dump(svc3, filenameSVC2)
+joblib.dump(svc1, filenameSVC1)
+joblib.dump(svc2, filenameSVC2)
+joblib.dump(svc3, filenameSVC3)
+joblib.dump(svc4, filenameSVC4)
 #========================================== END of SVM============================================================
 #
 lr=LogisticRegression(random_state = 0)
@@ -248,41 +253,9 @@ print("Logistic Regression with tf-idf")
 print(pd.DataFrame(data = m_confusion_test , columns=['Predicted 0', 'Predicted 1','Predicted 2'],index=['Actual 0','Actual 1','Actual 2']))
 print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
 print(metrics.classification_report(y_pred,y_test2))
-
+filenameLR1 = 'final_LR1_CV.sav'
+filenameLR2 = 'final_LR2_tfidf.sav'
+joblib.dump(lr, filenameLR1)
+joblib.dump(lr2, filenameLR2)
 #========================================== END of LR============================================================
 
-# ovr = OneVsRestClassifier(svm.SVC(C=1000,kernel='linear',probability=True))
-# ovr.fit(X_train,y_train)
-# ovr.predict(X_test)
-# m_confusion_test = metrics.confusion_matrix(y_test, ovr.predict(X_test))
-# print(m_confusion_test)
-
-
-# fpr_NB_tfidf, tpr_NB_tfidf , thresholdsNB1 = roc_curve(y_test2,bayes2.predict_proba(X_test2)[::,1])
-# fpr_NB_CV, tpr_NB_CV , thresholdsNB2 = roc_curve(y_test,bayes.predict_proba(X_test)[::,1])
-# fpr_svm_tfidf, tpr_svm_tfidf , thresholdsNB3 = roc_curve(y_test2,svc.predict_proba(X_test2)[::,1])
-# fpr_svm_CV, tpr_svm_CV , thresholdsNB4 = roc_curve(y_test,svc2.predict_proba(X_test)[::,1])
-#
-# auc_NB_tfidf = auc(fpr_NB_tfidf,tpr_NB_tfidf)
-# auc_NB_CV = auc(fpr_NB_CV,tpr_NB_CV)
-# auc_svm_tfidf = auc(fpr_svm_tfidf,tpr_svm_tfidf)
-# auc_svm_CV = auc(fpr_svm_CV,tpr_svm_CV)
-#
-# plt.figure(1)
-# plt.plot([0,1] , [0,1],'k--')
-# plt.plot(fpr_NB_tfidf,tpr_NB_tfidf,label=format(auc_NB_tfidf))
-# plt.plot(fpr_NB_CV,tpr_NB_CV,label=format(auc_NB_CV))
-# plt.plot(fpr_svm_tfidf,tpr_svm_tfidf,label=format(auc_svm_tfidf))
-# plt.plot(fpr_svm_CV,tpr_svm_CV,label=format(auc_svm_CV))
-# plt.xlabel('False positive rate (FPR)')
-# plt.ylabel('True positive rate (TPR)')
-# plt.title('ROC curve')
-# plt.legend(loc='best')
-# plt.show()
-
-
-# save the model to disk
-# filenameSVC = 'final_SVC.sav'
-# filenameNB = 'final_NB.sav'
-# joblib.dump(svc2, filenameSVC)
-# joblib.dump(bayes, filenameNB)

@@ -9,10 +9,10 @@ def getTweets():
     today = date.today()
 
 
-    consumer_key= '6bq97Awgm0hbhz3avHkTLwlNC'
-    consumer_secret= '1GnlUw7rpbWq5k5QdMaivbyv2KrE3Gkoa0PPwtmryKI1QArmJ0'
-    access_token= '1458363905852551171-mLu1MIulnPZEHreJw0yDGBqaj8Cowv'
-    access_token_secret= 'ozu44KBdeF6dlUxugXhjHyBzphmBCt5XMadChNb7M68nN'
+    consumer_key= 
+    consumer_secret= 
+    access_token= 
+    access_token_secret= 
 
 
     auth = tw.OAuthHandler(consumer_key, consumer_secret)

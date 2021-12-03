@@ -7,15 +7,16 @@ from pandas.io import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 from werkzeug.utils import redirect
 import joblib
-import getTweets
+import test
+# import getTweets
 app = Flask(__name__)
 
 @app.route('/index')
 def hello_world():
     return redirect(url_for('index.html'))
-@app.route('/success/<name>')
+@app.route('/success/')
 def success(name):
-    return 'result ' + name
+    return  redirect(url_for('test.py'))
 
 @app.route('/predict',methods = ['POST', 'GET'])
 def predict():
@@ -23,15 +24,15 @@ def predict():
 
         model = request.form['slct']
         print(model)
-        data = getTweets()
+        # data = getTweets()
         if model == '0':
             # load the model from disk
 
             loaded_model = joblib.load('final_SVC_rbf_CV.sav')
-            text = processText()
-            result = loaded_model.predict(text)
-            print(result)
-            return redirect(url_for('success',name = "NB"))
+            # text = processText()
+            # result = loaded_model.predict(text)
+            # print(result)
+            return redirect(url_for('success',name = "SVC rbf"))
         elif model == '1':
             return redirect(url_for('success',name = "SVM"))
         elif model == '2':

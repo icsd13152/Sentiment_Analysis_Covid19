@@ -29,3 +29,13 @@ $ kaggle kernels output gauravsahani/covid-19-sentiment-analysis-using-spacy -p 
 In order to see the whole process and clarrifications during training/validation and test, see the SentimentAnalysis.ipynb file.
 
 
+## Source Code
+
+You can find the source code that is used for this project under the Covid19sentimentAnalysis/ directory.
+
+
+## Dash application
+
+In order to have productive processes, I have create a Web UI DashBoard. In order to run this application, you have to download the source code and run NAME.py in localhost mode (probably port 8050).
+Below an image of use-case for the application.  
+

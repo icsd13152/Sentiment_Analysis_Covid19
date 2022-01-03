@@ -36,6 +36,9 @@ You can find the source code that is used for this project under the Covid19sent
 
 ## Dash application
 
-In order to have productive processes, I have create a Web UI DashBoard. In order to run this application, you have to download the source code and run NAME.py in localhost mode (probably port 8050).
+In order to have productive processes, I have create a Web UI DashBoard. In order to run this application, you have to download the source code and run application.py in localhost mode (probably port 8050).
+The application.py is processing the test csv file from kaggle.
+If you want to see the application for live tweets using twitter API for fetching Data, you have to run the applicationOnLiveTweets.py
+In these apps you can choose the classifier you want by clicking in the dropdown menu that is located on the top of hmtl page.
 Below an image of use-case for the application.  
-
+![alt text](https://github.com/icsd13152/Sentiment_Analysis_Covid19/tree/main/Covid19sentimentAnalysis/mockupImageOfApplication/mockup.PNG?raw=true)

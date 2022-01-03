@@ -304,14 +304,14 @@ app.layout = d.html.Div(className='row',children=[
 
     d.html.Div(
         d.html.Div(children=[
-            d.dcc.Graph(id='left-top-bar-graph', style={'display': 'inline-block'}),
-            d.dcc.Graph(id='right-top-pie-graph', style={'display': 'inline-block'})
+            d.dcc.Graph(id='left-top-bar-graph', style={'display': 'inline-block','width': '60vh', 'height': '50vh'}),
+            d.dcc.Graph(id='right-top-pie-graph', style={'display': 'inline-block','width': '60vh', 'height': '50vh'})
         ])
 
     ),
     d.html.Div(
         d.html.Div(children=[
-            d.dcc.Graph(id="bigrams-scatter"),
+            d.dcc.Graph(id="bigrams-scatter",style={'width':'170vh'})
 
         ])
 
@@ -366,14 +366,14 @@ def update_pieChart(model):
 
 
 
-
+tsne = TSNE(n_components=1,learning_rate='auto',init='random')
+X_embedded  = tsne.fit_transform(tweets)
 @app.callback(
     Output("bigrams-scatter", "figure"),
     [Input("dropdown", "value")],
 )
 def populate_bigram_scatter(model):
-    tsne = TSNE(n_components=1)
-    X_embedded  = tsne.fit_transform(tweets)
+
     myModel = getModel(model)
     probas = myModel.predict_proba(tweets)
     prediction(myModel,tweets)

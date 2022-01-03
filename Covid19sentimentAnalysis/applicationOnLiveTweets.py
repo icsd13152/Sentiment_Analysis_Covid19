@@ -26,47 +26,47 @@ import pandas as pd
 from datetime import date, timedelta, datetime
 
 app = d.Dash(__name__)
-data = pd.read_csv(r"Corona_NLP_test.csv", encoding='ansi')
+# data = pd.read_csv(r"Corona_NLP_test.csv", encoding='ansi')
 
-# def getTweets():
-#     sysdateminus7 = ( datetime.now()- timedelta(days=7)).date()
-#     today = date.today()
-#
-#
-#     consumer_key= '6bq97Awgm0hbhz3avHkTLwlNC'
-#     consumer_secret= '1GnlUw7rpbWq5k5QdMaivbyv2KrE3Gkoa0PPwtmryKI1QArmJ0'
-#     access_token= '1458363905852551171-mLu1MIulnPZEHreJw0yDGBqaj8Cowv'
-#     access_token_secret= 'ozu44KBdeF6dlUxugXhjHyBzphmBCt5XMadChNb7M68nN'
-#
-#
-#     auth = tw.OAuthHandler(consumer_key, consumer_secret)
-#     auth.set_access_token(access_token, access_token_secret)
-#     api = tw.API(auth, wait_on_rate_limit=True)
-#
-#     # Define the search term and the date_since date as variables
-#     search_words = '#Covid19 OR #covid19 OR #Covid-19 OR COVID-19'
-#     date_since = sysdateminus7
-#     #twitter has changed his API and we can only get tweets from 1 week ago.
-#     tweets = tw.Cursor(api.search_tweets,
-#                        q=search_words,
-#                        lang="en",
-#                        since=date_since,
-#                        until = today).items(20)
-#
-#     listTweets = list()
-#
-#     for tweet in tweets:
-#         if isinstance(tweet.text, float) == False and tweet.text is not None:
-#             listTweets.append(tweet.text)
-#
-#
-#     tweet_text = pd.DataFrame(data=listTweets,
-#                               columns=['OriginalTweet'])
-#
-#
-#     return tweet_text
+def getTweets():
+    sysdateminus7 = ( datetime.now()- timedelta(days=7)).date()
+    today = date.today()
 
-# liveData=getTweets()
+
+    consumer_key= '6bq97Awgm0hbhz3avHkTLwlNC'
+    consumer_secret= '1GnlUw7rpbWq5k5QdMaivbyv2KrE3Gkoa0PPwtmryKI1QArmJ0'
+    access_token= '1458363905852551171-mLu1MIulnPZEHreJw0yDGBqaj8Cowv'
+    access_token_secret= 'ozu44KBdeF6dlUxugXhjHyBzphmBCt5XMadChNb7M68nN'
+
+
+    auth = tw.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tw.API(auth, wait_on_rate_limit=True)
+
+    # Define the search term and the date_since date as variables
+    search_words = '#Covid19 OR #covid19 OR #Covid-19 OR COVID-19'
+    date_since = sysdateminus7
+    #twitter has changed his API and we can only get tweets from 1 week ago.
+    tweets = tw.Cursor(api.search_tweets,
+                       q=search_words,
+                       lang="en",
+                       since=date_since,
+                       until = today).items(200)
+
+    listTweets = list()
+
+    for tweet in tweets:
+        if isinstance(tweet.text, float) == False and tweet.text is not None:
+            listTweets.append(tweet.text)
+
+
+    tweet_text = pd.DataFrame(data=listTweets,
+                              columns=['OriginalTweet'])
+
+
+    return tweet_text
+
+data=getTweets()
 
 def getModel(model):
     if model == 'SVM':
@@ -319,8 +319,8 @@ app.layout = d.html.Div(className='row',children=[
 
 
 ])
-# tweetsLive = process(liveData)[0]
-tweets = process(data)[0]
+tweetsLive = process(data)[0]
+# tweets = process(data)[0]
 
 @app.callback(
     Output("left-top-bar-graph", "figure"),
@@ -329,7 +329,7 @@ def update_bar_chart(model):
 
     print(model)
     mymodel = getModel(model)
-    prediction(mymodel,tweets)
+    prediction(mymodel,tweetsLive)
 
     countNegative = 0
     countPositive = 0
@@ -350,7 +350,7 @@ def update_bar_chart(model):
     [Input("dropdown", "value")])
 def update_pieChart(model):
     mymodel = getModel(model)
-    prediction(mymodel,tweets)
+    prediction(mymodel,tweetsLive)
     countNegative = 0
     countPositive = 0
     countNeutral = 0
@@ -373,10 +373,10 @@ def update_pieChart(model):
 )
 def populate_bigram_scatter(model):
     tsne = TSNE(n_components=1)
-    X_embedded  = tsne.fit_transform(tweets)
+    X_embedded  = tsne.fit_transform(tweetsLive)
     myModel = getModel(model)
-    probas = myModel.predict_proba(tweets)
-    prediction(myModel,tweets)
+    probas = myModel.predict_proba(tweetsLive)
+    prediction(myModel,tweetsLive)
     df = pd.DataFrame(columns=['tsne_1','probas','Features'])
     df['tsne_1'] = X_embedded[:, 0]
     df['probas'] = pd.DataFrame(probas)

@@ -27,6 +27,7 @@ $ kaggle kernels output gauravsahani/covid-19-sentiment-analysis-using-spacy -p 
 ## Jupyter Notebook
 
 In order to see the whole process and clarrifications during training/validation and test, see the SentimentAnalysis.ipynb file.
+In order to see all of the plots in notebook produced by pyplot you can [clik here](https://nbviewer.org/github/icsd13152/Sentiment_Analysis_Covid19/blob/main/SentimentAnalysis.ipynb). In this link you can see the whole notebook too.
 
 
 ## Source Code

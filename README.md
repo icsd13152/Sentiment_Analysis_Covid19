@@ -7,7 +7,7 @@ In order to execute the Code, you must install the packages that their name and 
 In order to fetch and install all of the packages you have to run the below command:
 ```
 $ pip install -r requirements.txt
-
+$ python3 -m venv /path/to/new/virtual/environment
 ```
 
 

@@ -1,37 +1,29 @@
 import itertools
 import numpy as np
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import feature_extraction, model_selection, naive_bayes, metrics, svm
-from sklearn.ensemble import RandomForestClassifier, StackingClassifier
-from mlxtend.classifier import StackingClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.multiclass import OneVsRestClassifier
 import nltk
-from sklearn.metrics import roc_curve, roc_auc_score,auc
-import matplotlib
-import matplotlib.pyplot as plt
+
 from nltk.corpus import stopwords, wordnet
-import re, string
+
 from nltk import FreqDist, PorterStemmer, SnowballStemmer, Counter
-#from wordcloud import WordCloud,STOPWORDS
-# nltk.download('stopwords')
+
 from nltk.corpus import stopwords
-from sklearn.neighbors import KNeighborsClassifier
+
 
 nltk.download('wordnet')
-# nltk.download('punkt')
-# nltk.download('averaged_perceptron_tagger')
-# import these modules
+
 from nltk.stem import WordNetLemmatizer
-# from nltk.stem.snowball import SnowballStemmer
-import joblib
+
+#import joblib
 import time
-from textblob import TextBlob
+
 from sklearn.model_selection import GridSearchCV
-import seaborn as sns
+
 from sklearn import feature_selection
-data = pd.read_csv(r"Datasets/Corona_NLP_train.csv", encoding='ansi')
+data = pd.read_csv(r"Datasets/Corona_NLP_train.csv")
 
 
 
@@ -103,9 +95,11 @@ contraction_dict2 = {"Â":"","’":"'","ain't": "are not","'s":" is","aren't": "
                      "y'all": 'you all', "y'all'd": 'you all would',
                      "y'all'd've": 'you all would have', "y'all're": 'you all are',
                      "y'all've": 'you all have', "you'd": 'you had / you would',
-                     "you'd've": 'you would have',"&amp":"and","btc":"bitcoin","irs":"","spx":"","📍":"","✅":""
+                     "you'd've": 'you would have',"&amp":"and","btc":"bitcoin","irs":"","spx":"","📍":"","✅":"","ive":"i have",
+                     "coo":"","lka":"", "nyc":"","ktla":"","ppc":"pay per click","wjhl":"","plzzz":"please","orlf":"","etc":"",
+                     "ktvu":"","amidst":"","biz":"business","djt":"","ict":"information communications technology","yep":"yes",
+                     "yeap":"yes"
                      }
-
 emoticons={':)': 'happy', ':‑)': 'happy',
            ':-]': 'happy', ':-3': 'happy',
            ':->': 'happy', '8-)': 'happy',
@@ -243,8 +237,9 @@ data["OriginalTweet"]=data["OriginalTweet"].replace(" +", " ", regex=True)
 # df_2 = c2.sample(class_1)
 # undersampled_df = pd.concat([df_3,df_2,c1],axis=0)
 data['OriginalTweet']  = data['OriginalTweet'].str.strip()
-
-
+data.drop_duplicates(subset ="OriginalTweet",
+                   keep = False, inplace = True)
+data.reset_index(drop=True, inplace=True)
 Y = data["Sentiment"]
 
 
@@ -307,7 +302,7 @@ grid_predictions = grid.predict(X_test2)
 # # print classification report
 print(metrics.classification_report(y_test2, grid_predictions))
 
-param_grid = {'C':[0.01,0.1,1,2,10,100,1000,2000,5000]
+param_grid = {'C':[0.01,0.1,1,1.1,1.2,1.3,1.5,2,10,100,1000,2000,5000]
 
 
               }
@@ -338,39 +333,54 @@ grid_predictions = grid.predict(X_test2)
 print(metrics.classification_report(y_test2, grid_predictions))
 
 
+clf2 = naive_bayes.ComplementNB(alpha=0.70001).fit(X_train2,y_train2)
+y_pred2 = clf2.predict(X_test2)
+predicted_prob2 = clf2.predict_proba(X_test2)
+m_confusion_test = metrics.confusion_matrix(y_test2, y_pred2)
+print("NB")
+print(pd.DataFrame(data = m_confusion_test , columns=['Predicted -1', 'Predicted 0','Predicted 1'],index=['Actual -1','Actual 0','Actual 1']))
+print("Accuracy:",metrics.accuracy_score(y_test2, y_pred2))
+print(metrics.classification_report(y_pred2,y_test2))
 
-# clf1 = svm.SVC(kernel='rbf',C=1.3,probability=True).fit(X_train2,y_train2)
-# y_pred = clf1.predict(X_test2)
-# predicted_prob1 = clf1.predict_proba(X_test2)
-# m_confusion_test = metrics.confusion_matrix(y_test2, clf1.predict(X_test2))
-# print("SVM RBF")
-# print(pd.DataFrame(data = m_confusion_test , columns=['Predicted -1', 'Predicted 0','Predicted 1'],index=['Predicted -1', 'Predicted 0','Predicted 1']))
-# print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
-# print(metrics.classification_report(y_pred,y_test2))
-#
-# clf2 = naive_bayes.ComplementNB(alpha=0.40).fit(X_train2,y_train2)
-# y_pred = clf2.predict(X_test2)
-# predicted_prob2 = clf2.predict_proba(X_test2)
-# m_confusion_test = metrics.confusion_matrix(y_test2, clf2.predict(X_test2))
-# print("NB")
-# print(pd.DataFrame(data = m_confusion_test , columns=['Predicted -1', 'Predicted 0','Predicted 1'],index=['Actual -1','Actual 0','Actual 1']))
-# print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
-# print(metrics.classification_report(y_pred,y_test2))
-#
-# clf3 = LogisticRegression().fit(X_train2,y_train2)
-# y_pred = clf3.predict(X_test2)
-# predicted_prob3 = clf1.predict_proba(X_test2)
-# m_confusion_test = metrics.confusion_matrix(y_test2, clf3.predict(X_test2))
-# print("SVM Linear")
-# print(pd.DataFrame(data = m_confusion_test , columns=['Predicted -1', 'Predicted 0','Predicted 1'],index=['Predicted -1', 'Predicted 0','Predicted 1']))
-# print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
-# print(metrics.classification_report(y_pred,y_test2))
+clf1 = svm.SVC(kernel='rbf',C=1.5,gamma='scale',probability=True).fit(X_train2,y_train2)
+y_pred = clf1.predict(X_test2)
+predicted_prob1 = clf1.predict_proba(X_test2)
+m_confusion_test = metrics.confusion_matrix(y_test2, y_pred)
+print("SVM RBF")
+print(pd.DataFrame(data = m_confusion_test , columns=['Predicted -1', 'Predicted 0','Predicted 1'],index=['Predicted -1', 'Predicted 0','Predicted 1']))
+print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
+print(metrics.classification_report(y_pred,y_test2))
+
+clf3 = LogisticRegression(multi_class='multinomial', solver='newton-cg',C=10,max_iter=200).fit(X_train2,y_train2)
+y_pred3 = clf3.predict(X_test2)
+predicted_prob3 = clf3.predict_proba(X_test2)
+m_confusion_test = metrics.confusion_matrix(y_test2, y_pred3)
+print("Logistic Regression")
+print(pd.DataFrame(data = m_confusion_test , columns=['Predicted -1', 'Predicted 0','Predicted 1'],index=['Predicted -1', 'Predicted 0','Predicted 1']))
+print("Accuracy:",metrics.accuracy_score(y_test2, y_pred3))
+print(metrics.classification_report(y_pred3,y_test2))
+
+for clf, label in zip([clf1, clf2,clf3],
+                      ['SVM',
+                       'Naive Bayes',
+                       'Logistic Regression'
+                       ]):
+
+    scores = model_selection.cross_val_score(clf, X_train2, y_train2,
+                                             cv=3, scoring='accuracy')
+    scores2 = model_selection.cross_val_score(clf, X_train2, y_train2,
+                                             cv=3, scoring='f1')
+    print("Accuracy: %0.3f (+/- %0.3f) [%s]"
+          % (scores.mean(), scores.std(), label))
+    print("F1-Score: %0.3f (+/- %0.3f) [%s]"
+          % (scores2.mean(), scores2.std(), label))
 
 
 
 
 
-data = pd.read_csv(r"Datasets/Corona_NLP_test.csv", encoding='ansi')
+
+data = pd.read_csv(r"Datasets/Corona_NLP_test.csv")
 data["Sentiment"] = data["Sentiment"].replace('Extremely Negative', 'Negative', regex=True)
 
 data["Sentiment"] = data["Sentiment"].replace('Extremely Positive', 'Positive', regex=True)
@@ -378,7 +388,8 @@ data["Sentiment"]=data["Sentiment"].replace('Negative', -1, regex=True)
 data["Sentiment"]=data["Sentiment"].replace('Positive', 1, regex=True)
 data["Sentiment"]=data["Sentiment"].replace('Neutral', 0, regex=True)
 
-
+#to lower case
+data['OriginalTweet']  = data['OriginalTweet'].str.lower()
 data["OriginalTweet"] = data["OriginalTweet"].apply(lambda x: lookup_dict(x,emoticons))
 
 data['OriginalTweet']=data['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict1))
@@ -387,8 +398,7 @@ data['OriginalTweet']=data['OriginalTweet'].apply(lambda x:lookup_dict(x,contrac
 data['OriginalTweet'] = data['OriginalTweet'].apply(lambda x: ''.join(''.join(s)[:2] for _, s in itertools.groupby(x)))
 
 
-#to lower case
-data['OriginalTweet']  = data['OriginalTweet'].str.lower()
+
 
 #remove numbers
 data["OriginalTweet"] = data["OriginalTweet"].replace('[0-9]', '', regex=True)
@@ -472,31 +482,31 @@ data["OriginalTweet"]=data["OriginalTweet"].replace(" +", " ", regex=True)
 # df_2 = c2.sample(class_1)
 # undersampled_df = pd.concat([df_3,df_2,c1],axis=0)
 data['OriginalTweet']  = data['OriginalTweet'].str.strip()
-# remove stopwords in order to have only the full-meaning words (remove and , to etc)
-# data["OriginalTweet"] = data["OriginalTweet"].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop)]))
+data.drop_duplicates(subset ="OriginalTweet",
+                     keep = False, inplace = True)
 
-
+data.reset_index(drop=True, inplace=True)
 
 # countVec = vectorizer.transform(data["OriginalTweet"])
 tfidf= tfidf_vectorizer.transform(data["OriginalTweet"])
-# start = time.time()
-# y_pred= clf1.predict(tfidf)
-# duration = time.time() - start
-# print("SVM")
-# print(duration)
+start = time.time()
+y_pred= clf1.predict(tfidf)
+duration = time.time() - start
+print("SVM")
+print(duration)
 
-# start2 = time.time()
-# y_pred2= clf2.predict(tfidf)
-# duration2 = time.time() - start2
-# print("NB")
-# print(duration2)
+start2 = time.time()
+y_pred2= clf2.predict(tfidf)
+duration2 = time.time() - start2
+print("NB")
+print(duration2)
 
-# start3 = time.time()
-# y_pred3= sclf.predict(tfidf)
-# duration3 = time.time() - start3
-# print("Meta clf")
-# print(duration3)
+start3 = time.time()
+y_pred3= clf3.predict(tfidf)
+duration3 = time.time() - start3
+print("LR")
+print(duration3)
 
-# print("Accuracy:",metrics.accuracy_score(data["Sentiment"], y_pred))
-# print("Accuracy:",metrics.accuracy_score(data["Sentiment"], y_pred2))
-# print("Accuracy:",metrics.accuracy_score(data["Sentiment"], y_pred3))
+print("Accuracy:",metrics.accuracy_score(data["Sentiment"], y_pred))
+print("Accuracy:",metrics.accuracy_score(data["Sentiment"], y_pred2))
+print("Accuracy:",metrics.accuracy_score(data["Sentiment"], y_pred3))

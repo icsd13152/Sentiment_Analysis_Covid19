@@ -1,73 +1,29 @@
-# import dash
+
 import itertools
 
 import dash as d
-# import dash as html
-import re
 import joblib
 import nltk
 from dash.dependencies import Input, Output
 import plotly.express as px
-from nltk import SnowballStemmer
-import pandas as pd
-from nltk.corpus import stopwords
+
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
-import scattertext as st
-# df = px.data.tips()
-# days = df.day.unique()
-from plotly.graph_objects import Layout
-from plotly.validator_cache import ValidatorCache
-from sklearn.decomposition import PCA
+
+
 from sklearn.manifold import TSNE
 import demoji
-import tweepy as tw
+
 import pandas as pd
-from datetime import date, timedelta, datetime
+
 
 app = d.Dash(__name__)
 data = pd.read_csv(r"Datasets/Corona_NLP_test.csv", encoding='ansi')
 
-# def getTweets():
-#     sysdateminus7 = ( datetime.now()- timedelta(days=7)).date()
-#     today = date.today()
 #
-#
-#     consumer_key= '6bq97Awgm0hbhz3avHkTLwlNC'
-#     consumer_secret= '1GnlUw7rpbWq5k5QdMaivbyv2KrE3Gkoa0PPwtmryKI1QArmJ0'
-#     access_token= '1458363905852551171-mLu1MIulnPZEHreJw0yDGBqaj8Cowv'
-#     access_token_secret= 'ozu44KBdeF6dlUxugXhjHyBzphmBCt5XMadChNb7M68nN'
-#
-#
-#     auth = tw.OAuthHandler(consumer_key, consumer_secret)
-#     auth.set_access_token(access_token, access_token_secret)
-#     api = tw.API(auth, wait_on_rate_limit=True)
-#
-#     # Define the search term and the date_since date as variables
-#     search_words = '#Covid19 OR #covid19 OR #Covid-19 OR COVID-19'
-#     date_since = sysdateminus7
-#     #twitter has changed his API and we can only get tweets from 1 week ago.
-#     tweets = tw.Cursor(api.search_tweets,
-#                        q=search_words,
-#                        lang="en",
-#                        since=date_since,
-#                        until = today).items(20)
-#
-#     listTweets = list()
-#
-#     for tweet in tweets:
-#         if isinstance(tweet.text, float) == False and tweet.text is not None:
-#             listTweets.append(tweet.text)
-#
-#
-#     tweet_text = pd.DataFrame(data=listTweets,
-#                               columns=['OriginalTweet'])
-#
-#
-#     return tweet_text
-
-# liveData=getTweets()
-
+# loaded_model = joblib.load('savedModels/SVC.sav')
+# loaded_model = joblib.load('savedModels/nb.sav')
+# loaded_model = joblib.load('savedModels/LR.sav')
 def getModel(model):
     if model == 'SVM':
         loaded_model = joblib.load('savedModels/SVC.sav')
@@ -135,7 +91,10 @@ contraction_dict2 = {"Â":"","’":"'","ain't": "are not","'s":" is","aren't": "
                      "y'all": 'you all', "y'all'd": 'you all would',
                      "y'all'd've": 'you all would have', "y'all're": 'you all are',
                      "y'all've": 'you all have', "you'd": 'you had / you would',
-                     "you'd've": 'you would have',"&amp":"and","btc":"bitcoin","irs":"","spx":"","📍":"","✅":""
+                     "you'd've": 'you would have',"&amp":"and","btc":"bitcoin","irs":"","spx":"","📍":"","✅":"","ive":"i have",
+                     "coo":"","lka":"", "nyc":"","ktla":"","ppc":"pay per click","wjhl":"","plzzz":"please","orlf":"","etc":"",
+                     "ktvu":"","amidst":"","biz":"business","djt":"","ict":"information communications technology","yep":"yes",
+                     "yeap":"yes"
                      }
 
 emoticons={':)': 'happy', ':‑)': 'happy',
@@ -181,67 +140,69 @@ def get_pos( word ):
     most_common_pos_list = pos_counts.most_common(3)
     return most_common_pos_list[0][0]
 
-def process(data):
+def process(DataProc):
 
-    # data["Sentiment"] = data["Sentiment"].replace('Extremely Negative', 'Negative', regex=True)
+    # DataProc["Sentiment"] = DataProc["Sentiment"].replace('Extremely Negative', 'Negative', regex=True)
     #
-    # data["Sentiment"] = data["Sentiment"].replace('Extremely Positive', 'Positive', regex=True)
-    # data["Sentiment"]=data["Sentiment"].replace('Negative', -1, regex=True)
-    # data["Sentiment"]=data["Sentiment"].replace('Positive', 1, regex=True)
-    # data["Sentiment"]=data["Sentiment"].replace('Neutral', 0, regex=True)
+    # DataProc["Sentiment"] = DataProc["Sentiment"].replace('Extremely Positive', 'Positive', regex=True)
+    # DataProc["Sentiment"]=DataProc["Sentiment"].replace('Negative', -1, regex=True)
+    # DataProc["Sentiment"]=DataProc["Sentiment"].replace('Positive', 1, regex=True)
+    # DataProc["Sentiment"]=DataProc["Sentiment"].replace('Neutral', 0, regex=True)
     #to lower case
-    # data["OriginalTweet"]=data["OriginalTweet"].apply(lambda x:demoji.replace(x))
-    data["OriginalTweet"] = data["OriginalTweet"].apply(lambda x: lookup_dict(x,emoticons))
+    # DataProc["OriginalTweet"]=DataProc["OriginalTweet"].apply(lambda x:demoji.replace(x))
+    #to lower case
+    DataProc['OriginalTweet']  = DataProc['OriginalTweet'].str.lower()
+    DataProc["OriginalTweet"] = DataProc["OriginalTweet"].apply(lambda x: lookup_dict(x,emoticons))
 
-    data['OriginalTweet']=data['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict1))
-    data['OriginalTweet']=data['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict2))
+    DataProc['OriginalTweet']=DataProc['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict1))
+    DataProc['OriginalTweet']=DataProc['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict2))
 
-    data['OriginalTweet'] = data['OriginalTweet'].apply(lambda x: ''.join(''.join(s)[:2] for _, s in itertools.groupby(x)))
+    DataProc['OriginalTweet'] = DataProc['OriginalTweet'].apply(lambda x: ''.join(''.join(s)[:2] for _, s in itertools.groupby(x)))
 
 
     #to lower case
-    data['OriginalTweet']  = data['OriginalTweet'].str.lower()
+    DataProc['OriginalTweet']  = DataProc['OriginalTweet'].str.lower()
 
     #remove numbers
-    data["OriginalTweet"] = data["OriginalTweet"].replace('[0-9]', '', regex=True)
+    DataProc["OriginalTweet"] = DataProc["OriginalTweet"].replace('[0-9]', '', regex=True)
 
     #remove mentions
-    data["OriginalTweet"] = data["OriginalTweet"].replace('@([a-zA-Z0-9_]{1,50})', '', regex=True)
+    DataProc["OriginalTweet"] = DataProc["OriginalTweet"].replace('@([a-zA-Z0-9_]{1,50})', '', regex=True)
 
     #remove hashtags
-    data["OriginalTweet"] = data["OriginalTweet"].replace('#', '', regex=True)
+    DataProc["OriginalTweet"] = DataProc["OriginalTweet"].replace('#', '', regex=True)
 
     #remove urls
-    data["OriginalTweet"] = data["OriginalTweet"].replace('http\S+', '', regex=True)
+    DataProc["OriginalTweet"] = DataProc["OriginalTweet"].replace('http\S+', '', regex=True)
 
     # # #remove all remaining bad chars
-    data["OriginalTweet"]=data["OriginalTweet"].replace('[^\\w\\s]', '', regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace('[^\\w\\s]', '', regex=True)
 
-    data["OriginalTweet"]=data["OriginalTweet"].replace("Â", "", regex=True)
-    data["OriginalTweet"]=data["OriginalTweet"].replace("â", "a", regex=True)
-    data["OriginalTweet"]=data["OriginalTweet"].replace("nz", "", regex=True)
-    data['OriginalTweet']  = data['OriginalTweet'].str.strip()
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("Â", "", regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("â", "a", regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("nz", "", regex=True)
+    DataProc['OriginalTweet']  = DataProc['OriginalTweet'].str.strip()
 
 
-    data["OriginalTweet"]=data["OriginalTweet"].replace("_", "", regex=True)
-    data["OriginalTweet"]=data["OriginalTweet"].replace("   ", " ", regex=True)
-    data["OriginalTweet"]=data["OriginalTweet"].replace("  ", " ", regex=True)
-    # data["OriginalTweet"]=data["OriginalTweet"].replace("rn", "", regex=True)
-    # data["OriginalTweet"]=data["OriginalTweet"].replace("vr", "", regex=True)
-    # data["OriginalTweet"]=data["OriginalTweet"].replace("hl", "", regex=True)
-    # data["OriginalTweet"]=data["OriginalTweet"].replace("u", "", regex=True)
-    # data["OriginalTweet"]=data["OriginalTweet"].replace("ot", "", regex=True)
-    data['OriginalTweet']  = data['OriginalTweet'].str.strip()
-    data["OriginalTweet"]=data["OriginalTweet"].replace("coronavir¼", "coronavirus", regex=True)
-    data["OriginalTweet"]=data["OriginalTweet"].replace("pmmodi", "", regex=True)
-    data["OriginalTweet"]=data["OriginalTweet"].replace("amp", "and", regex=True)
-    data["OriginalTweet"]=data["OriginalTweet"].fillna(0)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("_", "", regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("   ", " ", regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("  ", " ", regex=True)
+    # DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("rn", "", regex=True)
+    # DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("vr", "", regex=True)
+    # DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("hl", "", regex=True)
+    # DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("u", "", regex=True)
+    # DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("ot", "", regex=True)
+    DataProc['OriginalTweet']  = DataProc['OriginalTweet'].str.strip()
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("coronavir¼", "coronavirus", regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("pmmodi", "", regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("amp", "and", regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].fillna(0)
 
-    data['OriginalTweet']  = data['OriginalTweet'].str.strip()
-    # print(data["OriginalTweet"][16])
-    # print(data["OriginalTweet"].head(25))
+    DataProc['OriginalTweet']  = DataProc['OriginalTweet'].str.strip()
+    # print(DataProc["OriginalTweet"][16])
+    # print(DataProc["OriginalTweet"].head(25))
     #Tokenize the tweets
-    tokenized_tweets = data["OriginalTweet"].apply(lambda x: x.split())
+    tokenized_tweets = DataProc["OriginalTweet"].apply(lambda x: x.split())
 
     #remove stopword(for example and,to at etc)
     stop_words = set(stopwords.words('english'))
@@ -259,32 +220,42 @@ def process(data):
     #Joining the tokenized tweets
     for i in range(len(tokenized_tweets)):
         tokenized_tweets[i] = ' '.join(tokenized_tweets[i])
-    data["OriginalTweet"] = tokenized_tweets
+    DataProc["OriginalTweet"] = tokenized_tweets
 
 
-    data['OriginalTweet']=data['OriginalTweet'].apply(lambda x:lookup_dict(x,myOwnStopWords))
+    DataProc['OriginalTweet']=DataProc['OriginalTweet'].apply(lambda x:lookup_dict(x,myOwnStopWords))
     all_words = []
-    for line in list(data['OriginalTweet']):
+    for line in list(DataProc['OriginalTweet']):
         words = line.split()
         for word in words:
             all_words.append(word.lower())
 
 
-    data["OriginalTweet"]=data["OriginalTweet"].replace("  ", " ", regex=True)
+    DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("  ", " ", regex=True)
+    DataProc['OriginalTweet']  = DataProc['OriginalTweet'].str.strip()
+    DataProc.drop_duplicates(subset ="OriginalTweet",
+                       keep = 'last', inplace = True)
+    DataProc.reset_index(drop=True, inplace=True)
+    tfidf= tfidf_vectorizer.transform(DataProc["OriginalTweet"])
+    return (tfidf,DataProc)
 
-    tfidf= tfidf_vectorizer.transform(data["OriginalTweet"])
-    return (tfidf,data["OriginalTweet"])
 
-
-def prediction(mymodel,tftweets):
+def prediction(mymodel,tftweets,dataProc):
     predicted = mymodel.predict(tftweets)
 
-    data['predictedSentiment'] = predicted
-
-    data["predictedSentiment"]=data["predictedSentiment"].replace(-1,'Negative', regex=True)
-    data["predictedSentiment"]=data["predictedSentiment"].replace( 1,'Positive', regex=True)
-    data["predictedSentiment"]=data["predictedSentiment"].replace( 0,'Neutral', regex=True)
-    return data['predictedSentiment']
+    count = 0
+    for i in predicted:
+        if i == 0:
+            count = count +1
+    print('Counter')
+    print(count)
+    dataProc['predictedSentiment'] = predicted
+    print('sentiment')
+    print(len(dataProc[dataProc['Sentiment'] == 'Neutral']))
+    dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace(-1,'Negative', regex=True)
+    dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace( 1,'Positive', regex=True)
+    dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace( 0,'Neutral', regex=True)
+    return dataProc
 
 
 
@@ -320,25 +291,26 @@ app.layout = d.html.Div(className='row',children=[
 
 ])
 # tweetsLive = process(liveData)[0]
-tweets = process(data)[0]
-
+tweets,dataProcessed = process(data)
+# finalDf = pd.DataFrame()
 @app.callback(
     Output("left-top-bar-graph", "figure"),
     [Input("dropdown", "value")])
 def update_bar_chart(model):
 
-    print(model)
+
     mymodel = getModel(model)
-    prediction(mymodel,tweets)
+    finalDf = prediction(mymodel,tweets,dataProcessed)
 
     countNegative = 0
     countPositive = 0
     countNeutral = 0
-    for i in data['predictedSentiment']:
+    for i in finalDf['predictedSentiment']:
         if i == 'Negative': countNegative = countNegative + 1
         elif i == 'Positive': countPositive = countPositive +1
         else: countNeutral = countNeutral +1
-
+    print('in chart')
+    print(countNeutral)
 
     fig = px.bar(x=['Negative','Neutral','Positive'], y=[countNegative,countNeutral,countPositive])
 
@@ -350,16 +322,16 @@ def update_bar_chart(model):
     [Input("dropdown", "value")])
 def update_pieChart(model):
     mymodel = getModel(model)
-    prediction(mymodel,tweets)
+    finalDf = prediction(mymodel,tweets,dataProcessed)
     countNegative = 0
     countPositive = 0
     countNeutral = 0
-    for i in data['predictedSentiment']:
+    for i in finalDf['predictedSentiment']:
         if i == 'Negative': countNegative = countNegative + 1
         elif i == 'Positive': countPositive = countPositive +1
         else: countNeutral = countNeutral +1
     fig2 = px.pie(values=[countNegative,countNeutral,countPositive], names=['Negative','Neutral','Positive'], title='Sentiments')
-    fig2.show()
+
     return fig2
 
 
@@ -376,20 +348,20 @@ def populate_bigram_scatter(model):
 
     myModel = getModel(model)
     probas = myModel.predict_proba(tweets)
-    prediction(myModel,tweets)
+    finalDf = prediction(myModel,tweets,dataProcessed)
     df = pd.DataFrame(columns=['tsne_1','probas','Features'])
     df['tsne_1'] = X_embedded[:, 0]
     df['probas'] = pd.DataFrame(probas)
-    df['tweet'] = data['OriginalTweet']
-    df['Sentiment'] = data['predictedSentiment']
+    df['tweet'] = finalDf['OriginalTweet']
+    df['Sentiment'] = finalDf['predictedSentiment']
     # print(df.shape)
     # print(df['tsne_1'].head(2))
     fig = px.scatter(df, x='probas', y='tsne_1', hover_name= 'tweet',color='Sentiment',size_max=45
-                     , template='plotly_white', title='Bigram similarity and frequency', labels={'words': 'Avg. Length<BR>(words)'}
+                     , template='plotly_white', title='Bigram similarity per class', labels={'words': 'Avg. Length<BR>(words)'}
                      , color_continuous_scale=px.colors.sequential.Sunsetdark)
     fig.update_traces(marker=dict(line=dict(width=1, color='Gray')))
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
-    fig.show()
+
     return fig
 app.run_server(debug=True)

@@ -135,9 +135,11 @@ contraction_dict2 = {"Â":"","’":"'","ain't": "are not","'s":" is","aren't": "
                      "y'all": 'you all', "y'all'd": 'you all would',
                      "y'all'd've": 'you all would have', "y'all're": 'you all are',
                      "y'all've": 'you all have', "you'd": 'you had / you would',
-                     "you'd've": 'you would have',"&amp":"and","btc":"bitcoin","irs":"","spx":"","📍":"","✅":""
+                     "you'd've": 'you would have',"&amp":"and","btc":"bitcoin","irs":"","spx":"","📍":"","✅":"","ive":"i have",
+                     "coo":"","lka":"", "nyc":"","ktla":"","ppc":"pay per click","wjhl":"","plzzz":"please","orlf":"","etc":"",
+                     "ktvu":"","amidst":"","biz":"business","djt":"","ict":"information communications technology","yep":"yes",
+                     "yeap":"yes"
                      }
-
 emoticons={':)': 'happy', ':‑)': 'happy',
            ':-]': 'happy', ':-3': 'happy',
            ':->': 'happy', '8-)': 'happy',
@@ -191,6 +193,8 @@ def process(data):
     # data["Sentiment"]=data["Sentiment"].replace('Neutral', 0, regex=True)
     #to lower case
     # data["OriginalTweet"]=data["OriginalTweet"].apply(lambda x:demoji.replace(x))
+    #to lower case
+    data['OriginalTweet']  = data['OriginalTweet'].str.lower()
     data["OriginalTweet"] = data["OriginalTweet"].apply(lambda x: lookup_dict(x,emoticons))
 
     data['OriginalTweet']=data['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict1))

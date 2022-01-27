@@ -138,7 +138,7 @@ contraction_dict2 = {"Â":"","’":"'","ain't": "are not","'s":" is","aren't": "
                      "you'd've": 'you would have',"&amp":"and","btc":"bitcoin","irs":"","spx":"","📍":"","✅":"","ive":"i have",
                      "coo":"","lka":"", "nyc":"","ktla":"","ppc":"pay per click","wjhl":"","plzzz":"please","orlf":"","etc":"",
                      "ktvu":"","amidst":"","biz":"business","djt":"","ict":"information communications technology","yep":"yes",
-                     "yeap":"yes"
+                     "yeap":"yes","gov":"goverment","psa":"public service announcement"
                      }
 emoticons={':)': 'happy', ':‑)': 'happy',
            ':-]': 'happy', ':-3': 'happy',

@@ -94,7 +94,7 @@ contraction_dict2 = {"Â":"","’":"'","ain't": "are not","'s":" is","aren't": "
                      "you'd've": 'you would have',"&amp":"and","btc":"bitcoin","irs":"","spx":"","📍":"","✅":"","ive":"i have",
                      "coo":"","lka":"", "nyc":"","ktla":"","ppc":"pay per click","wjhl":"","plzzz":"please","orlf":"","etc":"",
                      "ktvu":"","amidst":"","biz":"business","djt":"","ict":"information communications technology","yep":"yes",
-                     "yeap":"yes"
+                     "yeap":"yes","gov":"goverment","psa":"public service announcement"
                      }
 
 emoticons={':)': 'happy', ':‑)': 'happy',
@@ -142,9 +142,9 @@ def get_pos( word ):
 
 def process(DataProc):
 
-    # DataProc["Sentiment"] = DataProc["Sentiment"].replace('Extremely Negative', 'Negative', regex=True)
+    DataProc["Sentiment"] = DataProc["Sentiment"].replace('Extremely Negative', 'Negative', regex=True)
     #
-    # DataProc["Sentiment"] = DataProc["Sentiment"].replace('Extremely Positive', 'Positive', regex=True)
+    DataProc["Sentiment"] = DataProc["Sentiment"].replace('Extremely Positive', 'Positive', regex=True)
     # DataProc["Sentiment"]=DataProc["Sentiment"].replace('Negative', -1, regex=True)
     # DataProc["Sentiment"]=DataProc["Sentiment"].replace('Positive', 1, regex=True)
     # DataProc["Sentiment"]=DataProc["Sentiment"].replace('Neutral', 0, regex=True)
@@ -156,7 +156,8 @@ def process(DataProc):
 
     DataProc['OriginalTweet']=DataProc['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict1))
     DataProc['OriginalTweet']=DataProc['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict2))
-
+    DataProc['OriginalTweet']  = DataProc['OriginalTweet'].str.lower()
+    DataProc['OriginalTweet']=DataProc['OriginalTweet'].apply(lambda x:lookup_dict(x,contraction_dict2))
     DataProc['OriginalTweet'] = DataProc['OriginalTweet'].apply(lambda x: ''.join(''.join(s)[:2] for _, s in itertools.groupby(x)))
 
 
@@ -243,15 +244,10 @@ def process(DataProc):
 def prediction(mymodel,tftweets,dataProc):
     predicted = mymodel.predict(tftweets)
 
-    count = 0
-    for i in predicted:
-        if i == 0:
-            count = count +1
-    print('Counter')
-    print(count)
+
+    dataProc
     dataProc['predictedSentiment'] = predicted
-    print('sentiment')
-    print(len(dataProc[dataProc['Sentiment'] == 'Neutral']))
+
     dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace(-1,'Negative', regex=True)
     dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace( 1,'Positive', regex=True)
     dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace( 0,'Neutral', regex=True)
@@ -293,6 +289,7 @@ app.layout = d.html.Div(className='row',children=[
 # tweetsLive = process(liveData)[0]
 tweets,dataProcessed = process(data)
 # finalDf = pd.DataFrame()
+# finalDf = pd.DataFrame()
 @app.callback(
     Output("left-top-bar-graph", "figure"),
     [Input("dropdown", "value")])
@@ -300,19 +297,29 @@ def update_bar_chart(model):
 
 
     mymodel = getModel(model)
+
     finalDf = prediction(mymodel,tweets,dataProcessed)
+
 
     countNegative = 0
     countPositive = 0
     countNeutral = 0
-    for i in finalDf['predictedSentiment']:
-        if i == 'Negative': countNegative = countNegative + 1
-        elif i == 'Positive': countPositive = countPositive +1
-        else: countNeutral = countNeutral +1
+
+    for i in range(len(finalDf['predictedSentiment'])):
+            # for j in range(len(processeddf["Sentiment"])):
+        if finalDf['predictedSentiment'][i] == dataProcessed["Sentiment"][i]:
+            if finalDf['predictedSentiment'][i] == 'Negative':
+                countNegative = countNegative + 1
+            elif finalDf['predictedSentiment'][i] == 'Positive':
+                countPositive = countPositive + 1
+            elif finalDf['predictedSentiment'][i] == 'Neutral':
+                countNeutral = countNeutral + 1
     print('in chart')
     print(countNeutral)
 
-    fig = px.bar(x=['Negative','Neutral','Positive'], y=[countNegative,countNeutral,countPositive])
+    fig = px.bar(x=['Negative','Actual Negative','Neutral','Actual Neutral','Positive','Actual Positive'],
+                 y=[countNegative,len(dataProcessed[dataProcessed["Sentiment"]=='Negative']),countNeutral,len(dataProcessed[dataProcessed["Sentiment"]=='Neutral']),
+                    countPositive,len(dataProcessed[dataProcessed["Sentiment"]=='Positive'])])
 
 
     return fig
@@ -322,14 +329,20 @@ def update_bar_chart(model):
     [Input("dropdown", "value")])
 def update_pieChart(model):
     mymodel = getModel(model)
+
     finalDf = prediction(mymodel,tweets,dataProcessed)
     countNegative = 0
     countPositive = 0
     countNeutral = 0
-    for i in finalDf['predictedSentiment']:
-        if i == 'Negative': countNegative = countNegative + 1
-        elif i == 'Positive': countPositive = countPositive +1
-        else: countNeutral = countNeutral +1
+    for i in range(len(finalDf['predictedSentiment'])):
+
+        if finalDf['predictedSentiment'][i] == dataProcessed["Sentiment"][i]:
+            if finalDf['predictedSentiment'][i] == 'Negative':
+                countNegative = countNegative + 1
+            elif finalDf['predictedSentiment'][i] == 'Positive':
+                countPositive = countPositive + 1
+            elif finalDf['predictedSentiment'][i] == 'Neutral':
+                countNeutral = countNeutral + 1
     fig2 = px.pie(values=[countNegative,countNeutral,countPositive], names=['Negative','Neutral','Positive'], title='Sentiments')
 
     return fig2
@@ -348,6 +361,7 @@ def populate_bigram_scatter(model):
 
     myModel = getModel(model)
     probas = myModel.predict_proba(tweets)
+
     finalDf = prediction(myModel,tweets,dataProcessed)
     df = pd.DataFrame(columns=['tsne_1','probas','Features'])
     df['tsne_1'] = X_embedded[:, 0]

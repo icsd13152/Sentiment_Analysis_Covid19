@@ -6,7 +6,7 @@ import joblib
 import nltk
 from dash.dependencies import Input, Output
 import plotly.express as px
-
+nltk.download('stopwords')
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 

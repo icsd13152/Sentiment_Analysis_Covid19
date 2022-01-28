@@ -12,7 +12,7 @@ from nltk.stem import WordNetLemmatizer
 import demoji
 import pandas as pd
 import plotly.express as px
-
+from sklearn.manifold import TSNE
 
 data = pd.read_csv(r"Datasets/Corona_NLP_test.csv")
 print(data.shape)
@@ -301,7 +301,8 @@ def processSingle(tweet):
 
 
 tweets,processeddf = process(data)
-
+tsne = TSNE(n_components=1,learning_rate='auto',init='random')
+X_embedded  = tsne.fit_transform(tweets)
 print(tweets.shape)
 print(processeddf.shape)
 value = input("Please enter 1 if you want your single input or 2 from saved csv:\n")
@@ -326,8 +327,8 @@ if value == '2':
         loaded_model = joblib.load('savedModels/LR.sav')
 
     predicted = loaded_model.predict(tweets)
-    print(predicted.shape)
 
+    processeddf["PredictedSentiment"] = predicted
     countNegative = 0
     countPositive = 0
     countNeutral = 0
@@ -353,6 +354,24 @@ if value == '2':
     fig = px.bar(x=['Negative','Actual Negative','Neutral','Actual Neutral','Positive','Actual Positive'],
            y=[countNegative,len(processeddf[processeddf["Sentiment"]==-1]),countNeutral,len(processeddf[processeddf["Sentiment"]==0]),
               countPositive,len(processeddf[processeddf["Sentiment"]==1])])
+    fig.show()
+
+    probas = loaded_model.predict_proba(tweets)
+
+
+    df = pd.DataFrame(columns=['tsne_1','probas','Features'])
+    df['tsne_1'] = X_embedded[:, 0]
+    df['probas'] = pd.DataFrame(probas)
+    df['tweet'] = processeddf['OriginalTweet']
+    df['Sentiment'] = processeddf['PredictedSentiment']
+    # print(df.shape)
+    # print(df['tsne_1'].head(2))
+    fig = px.scatter(df, x='probas', y='tsne_1', hover_name= 'tweet',color='Sentiment',size_max=45
+                     , template='plotly_white', title='Bigram similarity per class', labels={'words': 'Avg. Length<BR>(words)'}
+                     , color_continuous_scale=px.colors.sequential.Sunsetdark)
+    fig.update_traces(marker=dict(line=dict(width=1, color='Gray')))
+    fig.update_xaxes(visible=False)
+    fig.update_yaxes(visible=False)
     fig.show()
 elif value == '1':
     t = input("Please Enter your Tweet about Covid-19:\n")

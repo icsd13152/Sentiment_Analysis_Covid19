@@ -23,6 +23,7 @@ As alternative way to get the Data you have to run the below command in your ter
 $ kaggle kernels output gauravsahani/covid-19-sentiment-analysis-using-spacy -p /path/to/dest
 
 ```
+Datasets are already located in the repository.
 
 ## Jupyter Notebook
 
@@ -32,7 +33,8 @@ In order to see all of the plots in notebook produced by pyplot you can [clik he
 
 ## Source Code
 
-You can find the source code that is used for this project under the Covid19sentimentAnalysis/ directory.
+You can find the source code that is used for this project under the Covid19sentimentAnalysis/ directory. 
+Classifier.py file contains the source code of preprocessing/processing/feature Engineering and selection/training/validation and testing on unseen Data.
 
 
 ## Dash application
@@ -44,3 +46,7 @@ In these apps you can choose the classifier you want by clicking in the dropdown
 Below an image of use-case for the application.  
 ![mockup](https://user-images.githubusercontent.com/39522734/147951850-80c6d39a-6afe-4a0e-bf66-689533381dde.PNG)
 There is also the DemoApp.py, which is the same aplication as the application.py but is running only on terminal and without Dash. This py file is reading the csv file too. 
+ 
+
+## Docs directory
+This directory contains the Presentation in pdf and ppt format.

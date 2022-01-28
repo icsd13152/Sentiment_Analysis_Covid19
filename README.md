@@ -33,7 +33,8 @@ In order to see all of the plots in notebook produced by pyplot you can [clik he
 
 ## Source Code
 
-You can find the source code that is used for this project under the Covid19sentimentAnalysis/ directory.
+You can find the source code that is used for this project under the Covid19sentimentAnalysis/ directory. 
+Classifier.py file contains the source code of preprocessing/processing/feature Engineering and selection/training/validation and testing on unseen Data.
 
 
 ## Dash application

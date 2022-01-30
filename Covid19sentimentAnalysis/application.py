@@ -1,4 +1,3 @@
-
 import itertools
 
 import dash as d
@@ -19,12 +18,12 @@ import pandas as pd
 
 
 app = d.Dash(__name__)
-data = pd.read_csv(r"Datasets/Corona_NLP_test.csv", encoding='ansi')
+data = pd.read_csv(r"Datasets/Corona_NLP_test.csv")
 
 #
-# loaded_model = joblib.load('savedModels/SVC.sav')
-# loaded_model = joblib.load('savedModels/nb.sav')
-# loaded_model = joblib.load('savedModels/LR.sav')
+svm = joblib.load('savedModels/SVC.sav')
+nb = joblib.load('savedModels/nb.sav')
+lr = joblib.load('savedModels/LR.sav')
 def getModel(model):
     if model == 'SVM':
         loaded_model = joblib.load('savedModels/SVC.sav')
@@ -236,23 +235,43 @@ def process(DataProc):
     DataProc["OriginalTweet"]=DataProc["OriginalTweet"].replace("  ", " ", regex=True)
     DataProc['OriginalTweet']  = DataProc['OriginalTweet'].str.strip()
     DataProc.drop_duplicates(subset ="OriginalTweet",
-                       keep = 'last', inplace = True)
+                             keep = 'last', inplace = True)
     DataProc.reset_index(drop=True, inplace=True)
     tfidf= tfidf_vectorizer.transform(DataProc["OriginalTweet"])
     return (tfidf,DataProc)
 
+tweets,dataProcessed = process(data)
 
-def prediction(mymodel,tftweets,dataProc):
-    predicted = mymodel.predict(tftweets)
+predictedLR = lr.predict(tweets)
+predictedLRprobas = lr.predict_proba(tweets)
+
+predictedSVM = svm.predict(tweets)
+predictedSVMprobas = svm.predict_proba(tweets)
+
+predictedNB = nb.predict(tweets)
+predictedNBprobas = nb.predict_proba(tweets)
+
+tsne = TSNE(n_components=1,learning_rate='auto',init='random')
+X_embedded  = tsne.fit_transform(tweets)
 
 
-    dataProc
-    dataProc['predictedSentiment'] = predicted
+dataProcessed['predictedSentimentSVM'] = predictedSVM
 
-    dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace(-1,'Negative', regex=True)
-    dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace( 1,'Positive', regex=True)
-    dataProc["predictedSentiment"]=dataProc["predictedSentiment"].replace( 0,'Neutral', regex=True)
-    return dataProc
+dataProcessed['predictedSentimentNB'] = predictedNB
+
+dataProcessed['predictedSentimentLR'] = predictedLR
+
+dataProcessed["predictedSentimentSVM"]=dataProcessed["predictedSentimentSVM"].replace(-1,'Negative', regex=True)
+dataProcessed["predictedSentimentSVM"]=dataProcessed["predictedSentimentSVM"].replace( 1,'Positive', regex=True)
+dataProcessed["predictedSentimentSVM"]=dataProcessed["predictedSentimentSVM"].replace( 0,'Neutral', regex=True)
+dataProcessed["predictedSentimentLR"]=dataProcessed["predictedSentimentLR"].replace(-1,'Negative', regex=True)
+dataProcessed["predictedSentimentLR"]=dataProcessed["predictedSentimentLR"].replace( 1,'Positive', regex=True)
+dataProcessed["predictedSentimentLR"]=dataProcessed["predictedSentimentLR"].replace( 0,'Neutral', regex=True)
+dataProcessed["predictedSentimentNB"]=dataProcessed["predictedSentimentNB"].replace(-1,'Negative', regex=True)
+dataProcessed["predictedSentimentNB"]=dataProcessed["predictedSentimentNB"].replace( 1,'Positive', regex=True)
+dataProcessed["predictedSentimentNB"]=dataProcessed["predictedSentimentNB"].replace( 0,'Neutral', regex=True)
+
+
 
 
 
@@ -287,37 +306,49 @@ app.layout = d.html.Div(className='row',children=[
 
 
 ])
-# tweetsLive = process(liveData)[0]
-tweets,dataProcessed = process(data)
-# finalDf = pd.DataFrame()
-# finalDf = pd.DataFrame()
+
+def calc(model,dataProcessed):
+    countNegative = 0
+    countPositive = 0
+    countNeutral = 0
+    if model == 'SVM':
+        for i in range(len(dataProcessed['predictedSentimentSVM'])):
+            # for j in range(len(processeddf["Sentiment"])):
+            if dataProcessed['predictedSentimentSVM'][i] == dataProcessed["Sentiment"][i]:
+                if dataProcessed['predictedSentimentSVM'][i] == 'Negative':
+                    countNegative = countNegative + 1
+                elif dataProcessed['predictedSentimentSVM'][i] == 'Positive':
+                    countPositive = countPositive + 1
+                elif dataProcessed['predictedSentimentSVM'][i] == 'Neutral':
+                    countNeutral = countNeutral + 1
+    elif model == 'Naive Bayes':
+        for i in range(len(dataProcessed['predictedSentimentNB'])):
+            # for j in range(len(processeddf["Sentiment"])):
+            if dataProcessed['predictedSentimentNB'][i] == dataProcessed["Sentiment"][i]:
+                if dataProcessed['predictedSentimentNB'][i] == 'Negative':
+                    countNegative = countNegative + 1
+                elif dataProcessed['predictedSentimentNB'][i] == 'Positive':
+                    countPositive = countPositive + 1
+                elif dataProcessed['predictedSentimentNB'][i] == 'Neutral':
+                    countNeutral = countNeutral + 1
+    elif model == 'Logistic Regression':
+        for i in range(len(dataProcessed['predictedSentimentLR'])):
+            # for j in range(len(processeddf["Sentiment"])):
+            if dataProcessed['predictedSentimentLR'][i] == dataProcessed["Sentiment"][i]:
+                if dataProcessed['predictedSentimentLR'][i] == 'Negative':
+                    countNegative = countNegative + 1
+                elif dataProcessed['predictedSentimentLR'][i] == 'Positive':
+                    countPositive = countPositive + 1
+                elif dataProcessed['predictedSentimentLR'][i] == 'Neutral':
+                    countNeutral = countNeutral + 1
+    return (countNegative,countNeutral,countPositive)
+
 @app.callback(
     Output("left-top-bar-graph", "figure"),
     [Input("dropdown", "value")])
 def update_bar_chart(model):
 
-
-    mymodel = getModel(model)
-
-    finalDf = prediction(mymodel,tweets,dataProcessed)
-
-
-    countNegative = 0
-    countPositive = 0
-    countNeutral = 0
-
-    for i in range(len(finalDf['predictedSentiment'])):
-            # for j in range(len(processeddf["Sentiment"])):
-        if finalDf['predictedSentiment'][i] == dataProcessed["Sentiment"][i]:
-            if finalDf['predictedSentiment'][i] == 'Negative':
-                countNegative = countNegative + 1
-            elif finalDf['predictedSentiment'][i] == 'Positive':
-                countPositive = countPositive + 1
-            elif finalDf['predictedSentiment'][i] == 'Neutral':
-                countNeutral = countNeutral + 1
-    print('in chart')
-    print(countNeutral)
-
+    countNegative,countNeutral,countPositive = calc(model,dataProcessed)
     fig = px.bar(x=['Negative','Actual Negative','Neutral','Actual Neutral','Positive','Actual Positive'],
                  y=[countNegative,len(dataProcessed[dataProcessed["Sentiment"]=='Negative']),countNeutral,len(dataProcessed[dataProcessed["Sentiment"]=='Neutral']),
                     countPositive,len(dataProcessed[dataProcessed["Sentiment"]=='Positive'])])
@@ -329,21 +360,7 @@ def update_bar_chart(model):
     Output("right-top-pie-graph", "figure"),
     [Input("dropdown", "value")])
 def update_pieChart(model):
-    mymodel = getModel(model)
-
-    finalDf = prediction(mymodel,tweets,dataProcessed)
-    countNegative = 0
-    countPositive = 0
-    countNeutral = 0
-    for i in range(len(finalDf['predictedSentiment'])):
-
-        if finalDf['predictedSentiment'][i] == dataProcessed["Sentiment"][i]:
-            if finalDf['predictedSentiment'][i] == 'Negative':
-                countNegative = countNegative + 1
-            elif finalDf['predictedSentiment'][i] == 'Positive':
-                countPositive = countPositive + 1
-            elif finalDf['predictedSentiment'][i] == 'Neutral':
-                countNeutral = countNeutral + 1
+    countNegative,countNeutral,countPositive = calc(model,dataProcessed)
     fig2 = px.pie(values=[countNegative,countNeutral,countPositive], names=['Negative','Neutral','Positive'], title='Sentiments')
 
     return fig2
@@ -352,25 +369,34 @@ def update_pieChart(model):
 
 
 
-tsne = TSNE(n_components=1,learning_rate='auto',init='random')
-X_embedded  = tsne.fit_transform(tweets)
+
 @app.callback(
     Output("bigrams-scatter", "figure"),
     [Input("dropdown", "value")],
 )
 def populate_bigram_scatter(model):
-
-    myModel = getModel(model)
-    probas = myModel.predict_proba(tweets)
-
-    finalDf = prediction(myModel,tweets,dataProcessed)
+    predProbas = None
     df = pd.DataFrame(columns=['tsne_1','probas','Features'])
+    if model == 'SVM':
+        predProbas = predictedSVMprobas
+        df['Sentiment'] = dataProcessed['predictedSentimentSVM']
+
+    elif model == 'Naive Bayes':
+        predProbas = predictedNBprobas
+        df['Sentiment'] = dataProcessed['predictedSentimentNB']
+
+    elif model == 'Logistic Regression':
+        predProbas = predictedLRprobas
+        df['Sentiment'] = dataProcessed['predictedSentimentLR']
+
+
+
+    # countNegative,countNeutral,countPositive = calc(model,dataProcessed)
+
     df['tsne_1'] = X_embedded[:, 0]
-    df['probas'] = pd.DataFrame(probas)
-    df['tweet'] = finalDf['OriginalTweet']
-    df['Sentiment'] = finalDf['predictedSentiment']
-    # print(df.shape)
-    # print(df['tsne_1'].head(2))
+    df['probas'] = pd.DataFrame(predProbas)
+    df['tweet'] = dataProcessed['OriginalTweet']
+
     fig = px.scatter(df, x='probas', y='tsne_1', hover_name= 'tweet',color='Sentiment',size_max=45
                      , template='plotly_white', title='Bigram similarity per class', labels={'words': 'Avg. Length<BR>(words)'}
                      , color_continuous_scale=px.colors.sequential.Sunsetdark)
@@ -379,4 +405,4 @@ def populate_bigram_scatter(model):
     fig.update_yaxes(visible=False)
 
     return fig
-app.run_server(debug=True)
+app.run_server(debug=False)

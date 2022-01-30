@@ -7,6 +7,8 @@ import re
 import joblib
 import nltk
 import numpy as np
+nltk.download('stopwords')
+nltk.download('wordnet')
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 import demoji

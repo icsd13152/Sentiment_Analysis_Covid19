@@ -363,7 +363,7 @@ def update_pieChart(model):
         elif i == 'Positive': countPositive = countPositive +1
         else: countNeutral = countNeutral +1
     fig2 = px.pie(values=[countNegative,countNeutral,countPositive], names=['Negative','Neutral','Positive'], title='Sentiments')
-    fig2.show()
+    # fig2.show()
     return fig2
 
 
@@ -383,7 +383,7 @@ def populate_bigram_scatter(model):
     prediction(myModel,tweetsLive)
     df = pd.DataFrame(columns=['tsne_1','probas','Features'])
     df['tsne_1'] = X_embedded[:, 0]
-    df['probas'] = pd.DataFrame(probas)
+    df['probas'] = pd.DataFrame(probas[:,2])
     df['tweet'] = data['OriginalTweet']
     df['Sentiment'] = data['predictedSentiment']
     # print(df.shape)
@@ -394,6 +394,6 @@ def populate_bigram_scatter(model):
     fig.update_traces(marker=dict(line=dict(width=1, color='Gray')))
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
-    fig.show()
+    # fig.show()
     return fig
-app.run_server(debug=True)
+app.run_server(debug=False)

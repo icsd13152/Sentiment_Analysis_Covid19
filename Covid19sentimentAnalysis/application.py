@@ -394,7 +394,7 @@ def populate_bigram_scatter(model):
     # countNegative,countNeutral,countPositive = calc(model,dataProcessed)
 
     df['tsne_1'] = X_embedded[:, 0]
-    df['probas'] = pd.DataFrame(predProbas)
+    df['probas'] = pd.DataFrame(predProbas[:,2])
     df['tweet'] = dataProcessed['OriginalTweet']
 
     fig = px.scatter(df, x='probas', y='tsne_1', hover_name= 'tweet',color='Sentiment',size_max=45

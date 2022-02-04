@@ -359,11 +359,12 @@ if value == '2':
     fig.show()
 
     probas = loaded_model.predict_proba(tweets)
-
+    print(predicted)
+    print(probas[:,2])
 
     df = pd.DataFrame(columns=['tsne_1','probas','Features'])
     df['tsne_1'] = X_embedded[:, 0]
-    df['probas'] = pd.DataFrame(probas)
+    df['probas'] = pd.DataFrame(probas[:,2])
     df['tweet'] = processeddf['OriginalTweet']
     df['Sentiment'] = processeddf['PredictedSentiment']
     # print(df.shape)

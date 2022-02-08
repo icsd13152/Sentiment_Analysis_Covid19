@@ -285,7 +285,7 @@ dic_vocab = tfidf_vectorizer.vocabulary_
 
 X_train2, X_test2, y_train2, y_test2 = model_selection.train_test_split(tfidf_new, Y, test_size=0.25,shuffle=True,random_state=0)
 
-
+#
 list_alpha = np.arange(1/100000, 10, 0.1)
 param_grid = {'alpha':list_alpha
 
@@ -350,7 +350,7 @@ print("SVM RBF")
 print(pd.DataFrame(data = m_confusion_test , columns=['Predicted -1', 'Predicted 0','Predicted 1'],index=['Predicted -1', 'Predicted 0','Predicted 1']))
 print("Accuracy:",metrics.accuracy_score(y_test2, y_pred))
 print(metrics.classification_report(y_pred,y_test2))
-
+#
 clf3 = LogisticRegression(multi_class='multinomial', solver='newton-cg',C=10,max_iter=200).fit(X_train2,y_train2)
 y_pred3 = clf3.predict(X_test2)
 predicted_prob3 = clf3.predict_proba(X_test2)
@@ -366,14 +366,23 @@ for clf, label in zip([clf1, clf2,clf3],
                        'Logistic Regression'
                        ]):
 
-    scores = model_selection.cross_val_score(clf, X_train2, y_train2,
+    scoresTest = model_selection.cross_val_score(clf, X_test2, y_test2,
                                              cv=3, scoring='accuracy')
-    scores2 = model_selection.cross_val_score(clf, X_train2, y_train2,
-                                             cv=3, scoring='f1')
-    print("Accuracy: %0.3f (+/- %0.3f) [%s]"
-          % (scores.mean(), scores.std(), label))
-    print("F1-Score: %0.3f (+/- %0.3f) [%s]"
-          % (scores2.mean(), scores2.std(), label))
+    scores2Test = model_selection.cross_val_score(clf, X_test2, y_test2,
+                                             cv=3, scoring='f1_macro')
+    print("Accuracy on Test set: %0.3f (+/- %0.3f) [%s]"
+          % (scoresTest.mean(), scoresTest.std(), label))
+    print("F1-Score on Test set: %0.3f (+/- %0.3f) [%s]"
+          % (scores2Test.mean(), scores2Test.std(), label))
+
+    scoresTrain = model_selection.cross_val_score(clf, X_train2, y_train2,
+                                                 cv=3, scoring='accuracy')
+    scores2Train = model_selection.cross_val_score(clf, X_train2, y_train2,
+                                                  cv=3, scoring='f1_macro')
+    print("Accuracy on Train set: %0.3f (+/- %0.3f) [%s]"
+          % (scoresTrain.mean(), scoresTrain.std(), label))
+    print("F1-Score on Train set: %0.3f (+/- %0.3f) [%s]"
+          % (scores2Train.mean(), scores2Train.std(), label))
 
 
 

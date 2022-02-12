@@ -46,7 +46,7 @@ In these apps you can choose the classifier you want by clicking in the dropdown
 Below an image of use-case for the application.  
 ![mockup](https://user-images.githubusercontent.com/39522734/147951850-80c6d39a-6afe-4a0e-bf66-689533381dde.PNG)
 There is also the DemoApp.py, which is the same aplication as the application.py but is running only on terminal and without Dash. This py file is reading the csv file too. 
-The DemoApp.py is producing the same results as application.py.
+The DemoApp.py is producing the same results as application.py. 
  Intractions for Execution:
  ```
 $ cd Covid19sentimentAnalysis/
@@ -65,5 +65,7 @@ $ cd Covid19sentimentAnalysis/
 $ python applicationOnLiveTweets.py
 
 ```
+Note: Maybe Dash apps will take a few seconds to startup.
+
 ## Docs directory
 This directory contains the Presentation in pdf and ppt format.

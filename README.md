@@ -49,17 +49,20 @@ There is also the DemoApp.py, which is the same aplication as the application.py
 The DemoApp.py is producing the same results as application.py.
  Intractions for Execution:
  ```
-$ python Covid19sentimentAnalysis/application.py
+$ cd Covid19sentimentAnalysis/
+$ python application.py
 
 ```
 OR
 ```
-$ python Covid19sentimentAnalysis/DemoApp.py
+$ cd Covid19sentimentAnalysis/
+$ python DemoApp.py
 
 ```
 OR
 ```
-$ python Covid19sentimentAnalysis/applicationOnLiveTweets.py
+$ cd Covid19sentimentAnalysis/
+$ python applicationOnLiveTweets.py
 
 ```
 ## Docs directory

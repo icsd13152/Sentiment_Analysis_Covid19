@@ -19,7 +19,7 @@ def getTweets():
     auth.set_access_token(access_token, access_token_secret)
     api = tw.API(auth, wait_on_rate_limit=True)
 
-    # Define the search term and the date_since date as variables
+    # Define the search terms and the date_since date as variables
     search_words = '#Covid19 OR #covid19 OR #Covid-19 OR COVID-19'
     date_since = sysdateminus7
     #twitter has changed his API and we can only get tweets from 1 week ago.

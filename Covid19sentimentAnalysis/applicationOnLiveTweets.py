@@ -26,7 +26,7 @@ import pandas as pd
 from datetime import date, timedelta, datetime
 
 app = d.Dash(__name__)
-# data = pd.read_csv(r"Datasets/Corona_NLP_test.csv", encoding='ansi')
+
 
 def getTweets():
     sysdateminus7 = ( datetime.now()- timedelta(days=7)).date()

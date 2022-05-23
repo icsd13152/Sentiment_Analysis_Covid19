@@ -9,7 +9,7 @@ In order to fetch and install all of the packages you have to run the below comm
 $ pip install -r requirements.txt
 
 ```
-(it will take about 3-5 minutes. It depends on Network/Internet speed.)
+(it will take about 3-4 minutes. It depends on Network/Internet speed.)
 
 ## Dataset
 

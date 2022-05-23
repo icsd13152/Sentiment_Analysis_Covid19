@@ -23,7 +23,7 @@ tfidf_vectorizer = joblib.load('savedModels/vectorizer.sav')
 
 
 
-#short words/apostrophe lookup
+#short words/apostrophe lookups
 contraction_dict1 = {"Â":"","’":"'","Ã":""}
 contraction_dict2 = {"Â":"","’":"'","ain't": "are not","'s":" is","aren't": "are not","don't": "do not","Don't":"Do not",
                      "I'll":"I will","Didn't":"Did not","hasn't":"has not","NYC":"New York City","16MAR20":"",

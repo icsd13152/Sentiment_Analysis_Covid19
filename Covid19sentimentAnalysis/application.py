@@ -20,7 +20,7 @@ import pandas as pd
 app = d.Dash(__name__)
 data = pd.read_csv(r"Datasets/Corona_NLP_test.csv")
 
-#
+
 svm = joblib.load('savedModels/SVC.sav')
 nb = joblib.load('savedModels/nb.sav')
 lr = joblib.load('savedModels/LR.sav')

@@ -83,7 +83,6 @@ terminado==0.12.1
 testpath==0.5.0
 threadpoolctl==3.0.0
 tifffile==2021.11.2
-timer==0.2.2
 tomli==2.0.0
 tornado==6.1
 tqdm==4.62.3

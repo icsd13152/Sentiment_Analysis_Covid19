@@ -19,7 +19,7 @@ from sklearn.manifold import TSNE
 data = pd.read_csv(r"Datasets/Corona_NLP_test.csv")
 print(data.shape)
 
-tfidf_vectorizer = joblib.load('savedModels/vectorizer.sav')
+tfidf_vectorizer = joblib.load('savedModels/vectorizer2.sav')
 
 
 
@@ -320,13 +320,13 @@ if value == '2':
 
 
     if m == '1':
-        loaded_model = joblib.load('savedModels/SVC.sav')
+        loaded_model = joblib.load('savedModels/SVC2.sav')
 
     elif m == '3':
-        loaded_model = joblib.load('savedModels/nb.sav')
+        loaded_model = joblib.load('savedModels/nb2.sav')
 
     elif m == '2':
-        loaded_model = joblib.load('savedModels/LR.sav')
+        loaded_model = joblib.load('savedModels/LR2.sav')
 
     predicted = loaded_model.predict(tweets)
 

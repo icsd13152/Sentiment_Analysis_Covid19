@@ -21,21 +21,21 @@ app = d.Dash(__name__)
 data = pd.read_csv(r"Datasets/Corona_NLP_test.csv")
 
 
-svm = joblib.load('savedModels/SVC.sav')
-nb = joblib.load('savedModels/nb.sav')
-lr = joblib.load('savedModels/LR.sav')
+svm = joblib.load('savedModels/SVC2.sav')
+nb = joblib.load('savedModels/nb2.sav')
+lr = joblib.load('savedModels/LR2.sav')
 def getModel(model):
     if model == 'SVM':
-        loaded_model = joblib.load('savedModels/SVC.sav')
+        loaded_model = joblib.load('savedModels/SVC2.sav')
         return loaded_model
     elif model == 'Naive Bayes':
-        loaded_model = joblib.load('savedModels/nb.sav')
+        loaded_model = joblib.load('savedModels/nb2.sav')
         return loaded_model
     elif model == 'Logistic Regression':
-        loaded_model = joblib.load('savedModels/LR.sav')
+        loaded_model = joblib.load('savedModels/LR2.sav')
         return loaded_model
 
-tfidf_vectorizer = joblib.load('savedModels/vectorizer.sav')
+tfidf_vectorizer = joblib.load('savedModels/vectorizer2.sav')
 # Regular expression for finding contractions
 #short words/apostrophe lookup
 contraction_dict1 = {"Â":"","’":"'","Ã":""}

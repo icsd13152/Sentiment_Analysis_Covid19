@@ -44,7 +44,7 @@ The application.py is processing the test csv file from kaggle.
 If you want to see the application for live tweets using twitter API for fetching Data, you have to run the applicationOnLiveTweets.py
 In these apps you can choose the classifier you want by clicking in the dropdown menu that is located on the top of hmtl page.
 Below an image of use-case for the application.  
-![mockup](https://user-images.githubusercontent.com/39522734/147951850-80c6d39a-6afe-4a0e-bf66-689533381dde.PNG)
+![mockup](https://github.com/icsd13152/Sentiment_Analysis_Covid19/blob/main/Covid19sentimentAnalysis/mockupImageOfApplication/mockup.PNG?raw=true)
 There is also the DemoApp.py, which is the same aplication as the application.py but is running only on terminal and without Dash. This py file is reading the csv file too. 
 The DemoApp.py is producing the same results as application.py. 
  Intractions for Execution:
